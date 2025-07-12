@@ -37,13 +37,21 @@ UniModel 是一个**统一模型服务引擎**，旨在以极其简单、高效�
 
 UniModel 实现了\*\*"通过统一实现简化"\*\*的理念：
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    统一API层                                │
-├─────────────────────────────────────────────────────────────┤
-│  🤖 LLM模型    │  👁️ CV模型     │  🎵 音频模型   │  📊 ML模型    │
-│  (GGUF, TRT-LLM)│  (ONNX, PyTorch)│  (Whisper等)  │  (Sklearn等)  │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TB
+    API[🌐 Unified API Layer]
+
+    subgraph Models
+        LLM[🤖 LLM Models<br/>（GGUF, TRT-LLM）]
+        CV[👁️ CV Models<br/>（ONNX, PyTorch）]
+        Audio[🎵 Audio Models<br/>（Whisper, etc.）]
+        ML[📊 ML Models<br/>（Sklearn, etc.）]
+    end
+
+    API --> LLM
+    API --> CV
+    API --> Audio
+    API --> ML
 ```
 
 ## ✨ 核心特性
@@ -95,7 +103,7 @@ let batch_config = BatchConfig {
 ## 🏛️ 架构概览
 
 ```mermaid
-graph TB
+graph LR
     %% API Gateway Layer
     subgraph API[API网关层（API Gateway）]
         REST[REST API服务器]

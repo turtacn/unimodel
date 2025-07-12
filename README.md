@@ -34,16 +34,22 @@ UniModel is a **Universal Model Serving Engine** designed to provide AI model se
 
 UniModel implements a **"Simplicity through Unification"** philosophy:
 
+```mermaid
+flowchart TB
+    API[🌐 Unified API Layer]
+
+    subgraph Models
+        LLM[🤖 LLM Models<br/>（GGUF, TRT-LLM）]
+        CV[👁️ CV Models<br/>（ONNX, PyTorch）]
+        Audio[🎵 Audio Models<br/>（Whisper, etc.）]
+        ML[📊 ML Models<br/>（Sklearn, etc.）]
+    end
+
+    API --> LLM
+    API --> CV
+    API --> Audio
+    API --> ML
 ```
-
-┌─────────────────────────────────────────────────────────────┐
-│                    Unified API Layer                        │
-├─────────────────────────────────────────────────────────────┤
-│  🤖 LLM Models  │  👁️ CV Models  │  🎵 Audio Models  │  📊 ML Models  │
-│  (GGUF, TRT-LLM)│  (ONNX, PyTorch)│  (Whisper, etc.) │  (Sklearn, etc.)│
-└─────────────────────────────────────────────────────────────┘
-
-````
 
 ## ✨ Core Features
 
@@ -93,7 +99,7 @@ let batch_config = BatchConfig {
 ## 🏛️ Architecture Overview
 
 ```mermaid
-graph TB
+graph LR
     %% API Gateway Layer
     subgraph API[API网关层（API Gateway）]
         REST[REST API服务器]
