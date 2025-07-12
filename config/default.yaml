@@ -1,0 +1,80 @@
+# UniModel默认配置
+
+# 服务器配置
+server:
+  host: "0.0.0.0"
+  port: 8000
+  grpc_port: 9000
+  max_connections: 1000
+  request_timeout_secs: 300
+  enable_tls: false
+  tls_cert_path: null
+  tls_key_path: null
+  worker_threads: null
+
+# 引擎配置
+engine:
+  max_models: 10
+  default_batch_size: 8
+  max_batch_wait_ms: 50
+  batch_config:
+    max_batch_size: 32
+    max_wait_time_ms: 100
+    timeout_ms: 30000
+  gpu:
+    device_ids: [0]
+    memory_fraction: 0.8
+    enable_pooling: true
+    enable_p2p: false
+  memory:
+    max_memory_gb: 16.0
+    enable_mmap: true
+    cache_size_mb: 1024
+
+# 插件配置
+plugins:
+  plugin_dir: "./plugins"
+  enabled_plugins:
+    - "pytorch"
+    - "onnx"
+    - "tensorrt"
+  plugin_configs: {}
+  plugin_timeout_secs: 300
+
+# 监控配置
+monitoring:
+  prometheus_enabled: true
+  prometheus_port: 9090
+  jaeger_enabled: false
+  jaeger_endpoint: null
+  health_check_interval_secs: 30
+  metrics_collection_interval_secs: 60
+
+# 安全配置
+security:
+  auth_enabled: false
+  jwt_secret: null
+  api_keys: []
+  cors_enabled: true
+  cors_allowed_origins: ["*"]
+  rate_limiting:
+    enabled: true
+    requests_per_minute: 1000
+    burst_size: 100
+
+# 存储配置
+storage:
+  model_storage_path: "./models"
+  cache_storage_path: "./cache"
+  log_storage_path: "./logs"
+  max_storage_gb: 1000
+
+# 日志配置
+logging:
+  level: "info"
+  format: "json"
+  console_output: true
+  file_output: true
+  file_path: "./logs/unimodel.log"
+  rotation_size_mb: 100
+  retention_count: 10

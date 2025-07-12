@@ -1,0 +1,167 @@
+[package]
+  name = "unimodel"
+  version = "0.1.0"
+  edition = "2021"
+  authors = ["UniModel Team <team@unimodel.ai>"]
+  description = "A high-performance unified model inference engine"
+  license = "MIT"
+  repository = "https://github.com/your-org/unimodel"
+  keywords = ["ml", "ai", "inference", "model", "engine"]
+  categories = ["science", "web-programming"]
+
+  [dependencies]
+  # 异步运行时
+  tokio = { version = "1.0", features = ["full"] }
+  tokio-util = { version = "0.7", features = ["full"] }
+  futures = "0.3"
+
+  # Web框架
+  axum = { version = "0.6", features = ["headers", "multipart", "ws"] }
+  tower = { version = "0.4", features = ["full"] }
+  tower-http = { version = "0.4", features = ["full"] }
+  hyper = { version = "0.14", features = ["full"] }
+
+  # gRPC
+  tonic = { version = "0.9", features = ["tls", "tls-roots"] }
+  tonic-reflection = "0.9"
+  prost = "0.11"
+
+  # 序列化
+  serde = { version = "1.0", features = ["derive"] }
+  serde_json = "1.0"
+  serde_yaml = "0.9"
+  bincode = "1.3"
+
+  # 数据库
+  sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "chrono", "uuid"] }
+  redis = { version = "0.23", features = ["tokio-comp", "cluster"] }
+
+  # 监控和日志
+  tracing = "0.1"
+  tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+  tracing-opentelemetry = "0.19"
+  opentelemetry = { version = "0.19", features = ["rt-tokio"] }
+  opentelemetry-jaeger = { version = "0.18", features = ["rt-tokio"] }
+  prometheus = "0.13"
+  metrics = "0.21"
+  metrics-exporter-prometheus = "0.12"
+
+  # 配置
+  config = "0.13"
+  clap = { version = "4.0", features = ["derive"] }
+  dotenv = "0.15"
+
+  # 时间和UUID
+  chrono = { version = "0.4", features = ["serde"] }
+  uuid = { version = "1.0", features = ["v4", "serde"] }
+
+  # 错误处理
+  anyhow = "1.0"
+  thiserror = "1.0"
+
+  # 插件系统
+  libloading = "0.8"
+  inventory = "0.3"
+
+  # 并发和同步
+  parking_lot = "0.12"
+  arc-swap = "1.5"
+  dashmap = "5.4"
+
+  # 机器学习库
+  candle-core = "0.3"
+  candle-nn = "0.3"
+  candle-transformers = "0.3"
+  ort = "1.15"
+  tch = "0.12"
+
+  # 数据处理
+  ndarray = "0.15"
+  numpy = "0.19"
+  image = "0.24"
+  tokenizers = "0.13"
+
+  # 网络和HTTP
+  reqwest = { version = "0.11", features = ["json", "stream"] }
+  url = "2.3"
+
+  # 加密和安全
+  jsonwebtoken = "8.3"
+  bcrypt = "0.14"
+  rand = "0.8"
+
+  # 其他工具
+  lazy_static = "1.4"
+  once_cell = "1.17"
+  rayon = "1.7"
+  crossbeam = "0.8"
+  bytes = "1.4"
+  base64 = "0.21"
+
+  [dev-dependencies]
+  criterion = { version = "0.5", features = ["html_reports"] }
+  mockall = "0.11"
+  tempfile = "3.5"
+  proptest = "1.1"
+  tokio-test = "0.4"
+
+  [build-dependencies]
+  tonic-build = "0.9"
+  prost-build = "0.11"
+
+  [features]
+  default = ["pytorch
+  ```
+  ```toml
+  default = ["pytorch", "onnx", "tensorrt"]
+  pytorch = ["tch"]
+  onnx = ["ort"]
+  tensorrt = []
+  cuda = []
+  rocm = []
+  openvino = []
+  full = ["pytorch", "onnx", "tensorrt", "cuda"]
+
+  [[bin]]
+  name = "unimodel"
+  path = "src/main.rs"
+
+  [[bin]]
+  name = "unimodel-cli"
+  path = "src/bin/cli.rs"
+
+  [profile.release]
+  opt-level = 3
+  lto = true
+  codegen-units = 1
+  panic = "abort"
+  strip = true
+
+  [profile.dev]
+  opt-level = 0
+  debug = true
+  split-debuginfo = "unpacked"
+
+  [profile.bench]
+  opt-level = 3
+  debug = false
+  rpath = false
+  lto = true
+  debug-assertions = false
+  codegen-units = 1
+  panic = "abort"
+
+  [[bench]]
+  name = "performance_bench"
+  harness = false
+
+  [workspace]
+  members = [
+  "crates/unimodel-core",
+  "crates/unimodel-plugins",
+  "crates/unimodel-cli",
+  "crates/unimodel-proto",
+]
+
+  [patch.crates-io]
+# 如果需要使用特定版本的依赖项

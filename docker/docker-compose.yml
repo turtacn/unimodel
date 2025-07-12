@@ -1,0 +1,173 @@
+version: '3.8'
+
+services:
+  # UniModel主服务
+  unimodel:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"   # HTTP API
+      - "9000:9000"   # gRPC API
+      - "9090:9090"   # Prometheus metrics
+    volumes:
+      - ./config:/app/config:ro
+      - ./models:/app/models
+      - ./cache:/app/cache
+      - ./logs:/app/logs
+      - ./plugins:/app/plugins:ro
+    environment:
+      - RUST_LOG=debug
+      - UNIMODEL_HOST=0.0.0.0
+      - UNIMODEL_GPU_DEVICES=0
+    depends_on:
+      - etcd
+      - nats
+      - prometheus
+      - grafana
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # etcd集群
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.9
+    command:
+      - etcd
+      - --name=etcd1
+      - --data-dir=/etcd-data
+      - --listen-client-urls=http://0.0.0.0:2379
+      - --advertise-client-urls=http://etcd:2379
+      - --listen-peer-urls=http://0.0.0.0:2380
+      - --initial-advertise-peer-urls=http://etcd:2380
+      - --initial-cluster=etcd1=http://etcd:2380
+      - --initial-cluster-token=unimodel-cluster
+      - --initial-cluster-state=new
+    ports:
+      - "2379:2379"
+      - "2380:2380"
+    volumes:
+      - etcd_data:/etcd-data
+    restart: unless-stopped
+
+  # NATS消息队列
+  nats:
+    image: nats:2.10-alpine
+    ports:
+      - "4222:4222"
+      - "6222:6222"
+      - "8222:8222"
+    command:
+      - "--jetstream"
+      - "--store_dir=/data"
+      - "--max_file_store=10GB"
+      - "--max_mem_store=1GB"
+    volumes:
+      - nats_data:/data
+    restart: unless-stopped
+
+  # Prometheus监控
+  prometheus:
+    image: prom/prometheus:v2.47.0
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--web.enable-lifecycle'
+      - '--web.enable-admin-api'
+    restart: unless-stopped
+
+  # Grafana可视化
+  grafana:
+    image: grafana/grafana:10.1.0
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+
+  # Jaeger追踪
+  jaeger:
+    image: jaegertracing/all-in-one:1.49
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    restart: unless-stopped
+
+  # Redis缓存
+  redis:
+    image: redis:7.0-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+
+  # PostgreSQL数据库
+  postgres:
+    image: postgres:15-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=unimodel
+      - POSTGRES_USER=unimodel
+      - POSTGRES_PASSWORD=unimodel123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    restart: unless-stopped
+
+  # MinIO对象存储
+  minio:
+    image: minio/minio:RELEASE.2023-09-04T19-57-37Z
+    ports:
+      - "9001:9000"
+      - "9002:9001"
+    environment:
+      - MINIO_ROOT_USER=minioadmin
+      - MINIO_ROOT_PASSWORD=minioadmin123
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    restart: unless-stopped
+
+volumes:
+  etcd_data:
+  nats_data:
+  prometheus_data:
+  grafana_data:
+  redis_data:
+  postgres_data:
+  minio_data:
+
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
