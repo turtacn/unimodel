@@ -400,7 +400,7 @@ graph LR
 批处理引擎是UniModel的核心性能组件，负责智能批处理和调度优化：
 
 ```mermaid
-graph TB
+graph TD
     subgraph BATCH_ENGINE[批处理引擎（Batch Engine）]
         subgraph REQUEST_QUEUE[请求队列（Request Queue）]
             PRIORITY_Q[优先级队列<br/>（Priority Queue）]
