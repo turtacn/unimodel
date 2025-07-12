@@ -112,37 +112,54 @@ UniModel采用分层架构设计，通过清晰的职责分离和模块化设计
 
 ```mermaid
 graph TB
-    subgraph SOLUTION[解决方案架构（Solution Architecture）]
-        subgraph API[API层（API Layer）]
-            REST[REST API<br/>统一接口规范]
-            GRPC[gRPC API<br/>高性能RPC]
-            AUTH[认证授权<br/>（Authentication）]
-        end
-        
-        subgraph APP[应用层（Application Layer）]
-            ROUTER[请求路由<br/>（Request Router）]
-            VALID[参数验证<br/>（Validation）]
-            ORCH[编排协调<br/>（Orchestration）]
-        end
-        
-        subgraph DOMAIN[领域层（Domain Layer）]
-            BATCH[批处理引擎<br/>（Batch Engine）]
-            SCHED[调度器<br/>（Scheduler）]
-            POOL[资源池<br/>（Resource Pool）]
-            PLUGIN[插件管理<br/>（Plugin Manager）]
-        end
-        
-        subgraph INFRA[基础设施层（Infrastructure Layer）]
-            ETCD[etcd<br/>服务发现]
-            NATS[NATS<br/>消息总线]
-            PROM[Prometheus<br/>监控指标]
-            STORAGE[存储层<br/>（Storage）]
-        end
+
+    %% 第一行
+    subgraph API[API层（API Layer）]
+        REST[REST API<br/>统一接口规范]
+        GRPC[gRPC API<br/>高性能RPC]
+        AUTH[认证授权<br/>（Authentication）]
     end
-    
-    API --> APP
-    APP --> DOMAIN
-    DOMAIN --> INFRA
+
+    subgraph APP[应用层（Application Layer）]
+        ROUTER[请求路由<br/>（Request Router）]
+        VALID[参数验证<br/>（Validation）]
+        ORCH[编排协调<br/>（Orchestration）]
+    end
+
+
+    %% 第二行
+    subgraph DOMAIN[领域层（Domain Layer）]
+        BATCH[批处理引擎<br/>（Batch Engine）]
+        SCHED[调度器<br/>（Scheduler）]
+        POOL[资源池<br/>（Resource Pool）]
+        PLUGIN[插件管理<br/>（Plugin Manager）]
+    end
+
+    subgraph INFRA[基础设施层（Infrastructure Layer）]
+        ETCD[etcd<br/>服务发现]
+        NATS[NATS<br/>消息总线]
+        PROM[Prometheus<br/>监控指标]
+        STORAGE[存储层<br/>（Storage）]
+    end
+
+    %% 连接关系
+    REST --> ROUTER
+    GRPC --> ROUTER
+    AUTH --> VALID
+
+    ROUTER --> ORCH
+    VALID --> ORCH
+
+    ORCH --> BATCH
+    ORCH --> SCHED
+    ORCH --> PLUGIN
+    ORCH --> POOL
+
+    BATCH --> ETCD
+    SCHED --> NATS
+    PLUGIN --> PROM
+    POOL --> STORAGE
+
 ```
 
 ### 3.2 核心设计原则
@@ -180,7 +197,7 @@ graph TB
 ### 4.1 总体架构
 
 ```mermaid
-graph TB
+graph TD
     subgraph CLIENT[客户端层（Client Layer）]
         WEB[Web应用<br/>（Web Apps）]
         CLI[命令行工具<br/>（CLI Tools）]
